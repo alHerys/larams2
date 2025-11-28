@@ -1,116 +1,114 @@
-{{--
-filepath: resources/views/teacher/announcements/index.blade.php
-
-VIEW: Manage Announcements
-FUNGSI: Halaman untuk guru membuat dan melihat daftar pengumuman
-
-CONTROLLER: AnnouncementController@index
-ROUTE: route('teacher.announcements.index')
-
-VARIABEL DARI CONTROLLER:
-- $announcements: Paginated Collection of Announcement
+{{-- 
+    filepath: resources/views/teacher/announcements/index.blade.php
+    
+    VIEW: Create & Manage Announcements
+    FUNGSI: Halaman untuk guru membuat pengumuman baru dan melihat history
+    
+    CONTROLLER: AnnouncementController@index
+    ROUTE: route('teacher.announcements.index')
+    
+    VARIABEL DARI CONTROLLER:
+    - $announcements: Collection of Announcement (all)
 --}}
 @extends('layouts.app')
 
-@section('title', 'Kelola Pengumuman')
+@section('title', 'Announcement')
 
 @section('sidebar')
-    <a href="{{ route('teacher.dashboard') }}" class="text-black px-6 py-3 font-medium text-sm uppercase hover:bg-gray-200">
+    <a href="{{ route('teacher.dashboard') }}"
+        class="text-black px-6 py-3 font-medium text-sm uppercase tracking-wide hover:bg-gray-200 block transition-colors">
         Dashboard
     </a>
     <a href="{{ route('teacher.assignments.create') }}"
-        class="text-black px-6 py-3 font-medium text-sm uppercase hover:bg-gray-200">
+        class="text-black px-6 py-3 font-medium text-sm uppercase tracking-wide hover:bg-gray-200 block transition-colors">
         Create Assignment
     </a>
     <a href="{{ route('teacher.assignments.index') }}"
-        class="text-black px-6 py-3 font-medium text-sm uppercase hover:bg-gray-200">
+        class="text-black px-6 py-3 font-medium text-sm uppercase tracking-wide hover:bg-gray-200 block transition-colors">
         View Assignment
     </a>
     {{-- Active: Announcement --}}
-    <a href="{{ route('teacher.announcements.index') }}" class="bg-blue-400 px-6 py-3 font-medium text-sm uppercase">
+    <a href="{{ route('teacher.announcements.index') }}"
+        class="bg-blue-400 text-black px-6 py-3 font-medium text-sm uppercase tracking-wide block">
         Announcement
     </a>
 @endsection
 
 @section('content')
-    <div class="flex gap-8">
+    <div class="flex gap-8 h-full">
 
-        {{-- LEFT: FORM BUAT PENGUMUMAN --}}
-        <div class="flex-1">
-            <h2 class="text-xl font-semibold mb-4">Buat Pengumuman Baru</h2>
+        {{-- LEFT: Create Announcement Form --}}
+        <div class="w-1/2 bg-gray-50 p-8 flex flex-col items-center">
+            <h2 class="text-2xl mb-8">Create Announcement</h2>
 
-            {{--
-            TODO: Integrasi dengan route teacher.announcements.store
-            Controller: AnnouncementController@store
-            --}}
-            <form action="{{ route('teacher.announcements.store') }}" method="POST" class="space-y-4">
+            <form action="{{ route('teacher.announcements.store') }}" method="POST" class="w-full space-y-4">
                 @csrf
 
+                {{-- Title Field --}}
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
-                    <input type="text" name="title" id="title" required value="{{ old('title') }}"
-                        class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Masukkan judul pengumuman">
+                    <input type="text" name="title" placeholder="Title" value="{{ old('title') }}"
+                        class="w-full bg-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                     @error('title')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
 
+                {{-- Description/Content Field --}}
                 <div>
-                    <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Isi Pengumuman</label>
-                    <textarea name="content" id="content" rows="6" required
-                        class="w-full border border-gray-300 rounded px-3 py-2"
-                        placeholder="Tulis isi pengumuman...">{{ old('content') }}</textarea>
+                    <textarea name="content" placeholder="Description"
+                        class="w-full bg-gray-300 p-3 h-32 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none" required>{{ old('content') }}</textarea>
                     @error('content')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
 
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-medium">
-                    Buat Pengumuman
+                {{-- Submit Button --}}
+                <button type="submit"
+                    class="w-full bg-blue-300 py-3 mt-4 uppercase font-medium hover:bg-blue-400 transition">
+                    POST
                 </button>
             </form>
         </div>
 
-        {{-- RIGHT: HISTORY PENGUMUMAN --}}
-        <div class="flex-1">
-            <h2 class="text-xl font-semibold mb-4">Riwayat Pengumuman</h2>
+        {{-- RIGHT: History Announcement --}}
+        <div class="w-1/2">
+            {{-- Table Header --}}
+            <div class="flex bg-gray-100 p-3 text-sm font-medium mb-2">
+                <span class="flex-1">History Announcement</span>
+                <span class="w-24 text-center">Date</span>
+                <span class="w-24 text-center">Action</span>
+            </div>
 
-            <div class="space-y-4 max-h-[500px] overflow-y-auto">
-                {{--
-                Loop melalui data announcements dari controller
-                Variabel: $announcements (Paginated Collection)
-                --}}
+            {{-- Announcement List --}}
+            <div class="space-y-1 max-h-[500px] overflow-y-auto">
                 @forelse($announcements as $announcement)
-                    <div class="border border-gray-300 p-4 rounded">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-semibold">{{ $announcement->title }}</h3>
-                                <p class="text-sm text-gray-500">
-                                    {{ $announcement->created_at->format('d M Y H:i') }}
-                                </p>
-                            </div>
-                            {{--
-                            TODO: Integrasi dengan route teacher.announcements.destroy
-                            --}}
-                            <form action="{{ route('teacher.announcements.destroy', $announcement->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-700 text-sm"
-                                    onclick="return confirm('Yakin ingin menghapus?')">
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
-                        <p class="text-gray-700 mt-2">{{ Str::limit($announcement->content, 150) }}</p>
+                    <div class="flex items-center bg-gray-50 p-3 border border-gray-100">
+                        {{-- Title/Content Preview --}}
+                        <span class="flex-1 text-sm truncate" title="{{ $announcement->title }}">
+                            {{ Str::limit($announcement->title . ': ' . $announcement->content, 40) }}
+                        </span>
+
+                        {{-- Date --}}
+                        <span class="w-24 text-center text-sm bg-blue-200 py-1 mx-2">
+                            {{ $announcement->created_at->format('y/m/d') }}
+                        </span>
+
+                        {{-- Delete Button --}}
+                        <form action="{{ route('teacher.announcements.destroy', $announcement->id) }}" method="POST"
+                            class="inline" onsubmit="return confirm('Yakin ingin menghapus pengumuman ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="w-24 text-center text-sm bg-blue-200 hover:bg-blue-300 py-1 uppercase transition">
+                                DELETE
+                            </button>
+                        </form>
                     </div>
                 @empty
-                    <p class="text-gray-500">Belum ada pengumuman.</p>
+                    <div class="text-center text-gray-500 py-8 bg-gray-50 border border-gray-100">
+                        Belum ada pengumuman.
+                    </div>
                 @endforelse
-
-                {{-- Pagination --}}
-                <div class="mt-4">
-                    {{ $announcements->links() }}
-                </div>
             </div>
         </div>
 

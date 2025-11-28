@@ -54,8 +54,7 @@ class DashboardController extends Controller
     {
         $announcements = Announcement::with('user')
             ->latest()
-            ->take(5)
-            ->get();
+            ->paginate(5);
 
         $assignments = Assignment::with('submissions')
             ->latest()
@@ -82,33 +81,12 @@ class DashboardController extends Controller
      * - Daftar tugas yang tersedia
      * - Daftar submission dan nilai
      */
-    private function studentDashboard(): View
+    public function studentDashboard(): View
     {
-        $user = Auth::user();
-
         $announcements = Announcement::with('user')
-            ->latest()
-            ->take(5)
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
 
-        $assignments = Assignment::latest()->get();
-
-        // Ambil ID assignment yang sudah di-submit oleh murid ini
-        $submittedAssignmentIds = Submission::where('user_id', $user->id)
-            ->pluck('assignment_id')
-            ->toArray();
-
-        // Submission murid ini beserta nilainya
-        $mySubmissions = Submission::with('assignment')
-            ->where('user_id', $user->id)
-            ->latest()
-            ->get();
-
-        return view('dashboard.student', [
-            'announcements' => $announcements,
-            'assignments' => $assignments,
-            'submittedAssignmentIds' => $submittedAssignmentIds,
-            'mySubmissions' => $mySubmissions,
-        ]);
+        return view('dashboard.student', compact('announcements'));
     }
 }

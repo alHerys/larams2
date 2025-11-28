@@ -1,114 +1,151 @@
 <?php
 
-// filepath: app/Http/Controllers/AssignmentController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Assignment;
 use App\Models\Submission;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\View\View;
 
-/**
- * CONTROLLER: AssignmentController
- *
- * Menangani CRUD tugas
- *
- * ROUTES yang ditangani:
- * - GET    /teacher/assignments            -> index()
- * - GET    /teacher/assignments/create     -> create()
- * - POST   /teacher/assignments            -> store()
- * - GET    /teacher/assignments/{id}       -> show() (dengan daftar submission)
- * - DELETE /teacher/assignments/{id}       -> destroy()
- */
 class AssignmentController extends Controller
 {
     /**
-     * Menampilkan daftar semua tugas (untuk guru)
+     * Display a listing of assignments with optional edit/view panel
      */
-    public function index(): View
+    public function index(Request $request)
     {
-        $assignments = Assignment::withCount('submissions')
-            ->latest()
-            ->paginate(10);
+        // Ambil semua assignment milik teacher yang login
+        $assignments = Assignment::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('teacher.assignments.index', [
-            'assignments' => $assignments,
-        ]);
+        $selectedAssignment = null;
+        $mode = null;
+
+        // Cek apakah ada parameter id dan mode
+        if ($request->has('id') && $request->has('mode')) {
+            $selectedAssignment = Assignment::where('id', $request->id)
+                ->where('user_id', Auth::id())
+                ->with(['submissions.user']) // Eager load submissions dengan user
+                ->first();
+            $mode = $request->mode; // 'edit' atau 'view'
+        }
+
+        return view('teacher.assignments.index', compact('assignments', 'selectedAssignment', 'mode'));
     }
 
     /**
-     * Menampilkan form buat tugas baru
+     * Show the form for creating a new assignment
      */
-    public function create(): View
+    public function create()
     {
         return view('teacher.assignments.create');
     }
 
     /**
-     * Menyimpan tugas baru
+     * Store a newly created assignment
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        // Validasi input
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'file_path' => 'nullable|file|mimes:pdf,doc,docx,zip,png,jpg|max:2048',
-            'due_date' => 'nullable|date|after:today',
+            'file_path' => 'nullable|file|max:2048|mimes:pdf,doc,docx,zip,png,jpg',
+            'due_date' => 'nullable|date|after:now',
         ]);
 
-        // Handle file upload jika ada
-        $filePath = null;
+        $assignment = new Assignment;
+        $assignment->user_id = Auth::id();
+        $assignment->title = $validated['title'];
+        $assignment->description = $validated['description'];
+        $assignment->due_date = $validated['due_date'] ?? null;
+
+        // Handle file upload
         if ($request->hasFile('file_path')) {
-            $filePath = $request->file('file_path')->store('assignments', 'public');
+            $assignment->file_path = $request->file('file_path')->store('assignments', 'public');
         }
 
-        // Simpan ke database
-        Assignment::create([
-            'user_id' => Auth::id(),
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'file_path' => $filePath,
-            'due_date' => $validated['due_date'] ?? null,
-        ]);
+        $assignment->save();
 
-        return redirect()
-            ->route('teacher.assignments.index')
-            ->with('success', 'Tugas berhasil dibuat!');
+        return redirect()->route('teacher.assignments.index')
+            ->with('success', 'Assignment berhasil dibuat!');
     }
 
     /**
-     * Menampilkan detail tugas beserta submission (untuk guru)
+     * Update the specified assignment
      */
-    public function show(Assignment $assignment): View
+    public function update(Request $request, $id)
     {
-        // Eager load submissions dengan data user
-        $assignment->load(['submissions.user']);
+        $assignment = Assignment::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-        return view('teacher.assignments.show', [
-            'assignment' => $assignment,
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'file_path' => 'nullable|file|max:2048|mimes:pdf,doc,docx,zip,png,jpg',
         ]);
+
+        $assignment->title = $validated['title'];
+        $assignment->description = $validated['description'];
+
+        // Handle file upload
+        if ($request->hasFile('file_path')) {
+            // Hapus file lama jika ada
+            if ($assignment->file_path) {
+                Storage::disk('public')->delete($assignment->file_path);
+            }
+            $assignment->file_path = $request->file('file_path')->store('assignments', 'public');
+        }
+
+        $assignment->save();
+
+        return redirect()->route('teacher.assignments.index')
+            ->with('success', 'Assignment berhasil diupdate!');
     }
 
     /**
-     * Menghapus tugas
+     * Remove the specified assignment
      */
-    public function destroy(Assignment $assignment): RedirectResponse
+    public function destroy($id)
     {
+        $assignment = Assignment::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
         // Hapus file jika ada
         if ($assignment->file_path) {
             Storage::disk('public')->delete($assignment->file_path);
         }
 
-        // Hapus assignment (submissions akan terhapus otomatis karena cascade)
         $assignment->delete();
 
-        return redirect()
-            ->route('teacher.assignments.index')
-            ->with('success', 'Tugas berhasil dihapus!');
+        return redirect()->route('teacher.assignments.index')
+            ->with('success', 'Assignment berhasil dihapus!');
+    }
+
+    public function studentIndex()
+    {
+        $assignments = Assignment::orderBy('created_at', 'desc')->get();
+
+        return view('student.assignments.index', compact('assignments'));
+    }
+
+    /**
+     * Show assignment detail for student (with submission form)
+     */
+    public function studentShow($id)
+    {
+        $assignment = Assignment::findOrFail($id);
+
+        // Cek apakah student sudah submit
+        $submission = Submission::where('user_id', Auth::id())
+            ->where('assignment_id', $id)
+            ->first();
+
+        $hasSubmitted = $submission !== null;
+
+        return view('student.assignments.show', compact('assignment', 'submission', 'hasSubmitted'));
     }
 }

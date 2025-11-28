@@ -1,84 +1,96 @@
 <?php
 
-// filepath: app/Http/Controllers/SubmissionController.php
-
 namespace App\Http\Controllers;
 
+use App\Models\Assignment;
 use App\Models\Submission;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-/**
- * CONTROLLER: SubmissionController
- *
- * Menangani pengumpulan dan penilaian tugas
- *
- * ROUTES yang ditangani:
- * - POST /student/submissions              -> store() (murid submit)
- * - PUT  /teacher/submissions/{id}/grade   -> grade() (guru memberi nilai)
- */
 class SubmissionController extends Controller
 {
     /**
-     * Murid mengumpulkan tugas
+     * Store a new submission (for student)
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        // Validasi input
         $validated = $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
-            'file_path' => 'required|file|mimes:pdf,doc,docx,zip,jpg,png|max:5120',
+            'file_path' => 'required|file|max:5120|mimes:pdf,doc,docx,zip,png,jpg,jpeg',
         ]);
-
-        $userId = Auth::id();
-        $assignmentId = $validated['assignment_id'];
 
         // Cek apakah sudah pernah submit
-        $existingSubmission = Submission::where('user_id', $userId)
-            ->where('assignment_id', $assignmentId)
-            ->exists();
+        $existingSubmission = Submission::where('user_id', Auth::id())
+            ->where('assignment_id', $validated['assignment_id'])
+            ->first();
 
         if ($existingSubmission) {
-            return redirect()
-                ->back()
-                ->with('error', 'Anda sudah mengumpulkan tugas ini sebelumnya.');
+            return back()->with('error', 'Anda sudah mengumpulkan tugas ini.');
         }
 
-        // Upload file
-        $filePath = $request->file('file_path')->store('submissions', 'public');
+        $submission = new Submission;
+        $submission->user_id = Auth::id();
+        $submission->assignment_id = $validated['assignment_id'];
 
-        // Simpan ke database
-        Submission::create([
-            'user_id' => $userId,
-            'assignment_id' => $assignmentId,
-            'file_path' => $filePath,
-        ]);
+        // Handle file upload
+        $submission->file_path = $request->file('file_path')->store('submissions', 'public');
 
-        return redirect()
-            ->back()
-            ->with('success', 'Tugas berhasil dikumpulkan!');
+        $submission->save();
+
+        return back()->with('success', 'Tugas berhasil dikumpulkan!');
     }
 
     /**
-     * Guru memberi nilai pada submission
+     * Grade a single submission (for teacher)
      */
-    public function grade(Request $request, Submission $submission): RedirectResponse
+    public function grade(Request $request, $id)
     {
-        // Validasi input
         $validated = $request->validate([
             'score' => 'required|integer|min:0|max:100',
-            'feedback' => 'nullable|string|max:1000',
         ]);
 
-        // Update submission
-        $submission->update([
-            'score' => $validated['score'],
-            'feedback' => $validated['feedback'] ?? null,
+        $submission = Submission::findOrFail($id);
+
+        // Verifikasi bahwa teacher adalah pemilik assignment
+        $assignment = Assignment::where('id', $submission->assignment_id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $submission->score = $validated['score'];
+        $submission->save();
+
+        return back()->with('success', 'Nilai berhasil disimpan!');
+    }
+
+    /**
+     * Grade all submissions at once (for teacher)
+     */
+    public function gradeAll(Request $request)
+    {
+        $validated = $request->validate([
+            'assignment_id' => 'required|exists:assignments,id',
+            'submissions' => 'required|array',
+            'submissions.*.id' => 'required|exists:submissions,id',
+            'submissions.*.score' => 'nullable|integer|min:0|max:100',
         ]);
 
-        return redirect()
-            ->back()
-            ->with('success', 'Nilai berhasil disimpan!');
+        // Verifikasi bahwa teacher adalah pemilik assignment
+        $assignment = Assignment::where('id', $validated['assignment_id'])
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Update semua nilai
+        foreach ($validated['submissions'] as $submissionData) {
+            if (isset($submissionData['score']) && $submissionData['score'] !== null && $submissionData['score'] !== '') {
+                $submission = Submission::find($submissionData['id']);
+                if ($submission && $submission->assignment_id == $assignment->id) {
+                    $submission->score = $submissionData['score'];
+                    $submission->save();
+                }
+            }
+        }
+
+        return redirect()->route('teacher.assignments.index', ['id' => $assignment->id, 'mode' => 'view'])
+            ->with('success', 'Semua nilai berhasil disimpan!');
     }
 }

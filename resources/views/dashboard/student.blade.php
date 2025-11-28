@@ -1,20 +1,16 @@
-{{--
-filepath: resources/views/dashboard/student.blade.php
-
-VIEW: Student Dashboard
-FUNGSI: Halaman dashboard untuk murid yang menampilkan:
-- Daftar pengumuman
-- Daftar tugas yang tersedia
-- Daftar submission dan nilai
-
-CONTROLLER: DashboardController@index
-ROUTE: route('student.dashboard')
-
-VARIABEL DARI CONTROLLER:
-- $announcements: Collection of Announcement
-- $assignments: Collection of Assignment
-- $submittedAssignmentIds: Array of assignment IDs yang sudah di-submit
-- $mySubmissions: Collection of Submission milik student ini
+{{-- 
+    filepath: resources/views/dashboard/student.blade.php
+    
+    VIEW: Student Dashboard
+    FUNGSI: Halaman dashboard untuk murid yang menampilkan:
+    - Daftar pengumuman dengan accordion style (sama seperti teacher)
+    - Navigasi Previous/Next untuk pagination
+    
+    CONTROLLER: DashboardController@studentDashboard
+    ROUTE: route('student.dashboard')
+    
+    VARIABEL DARI CONTROLLER:
+    - $announcements: Paginated Collection of Announcement
 --}}
 @extends('layouts.app')
 
@@ -23,150 +19,119 @@ VARIABEL DARI CONTROLLER:
 @section('sidebar')
     {{-- Active: Dashboard --}}
     <a href="{{ route('student.dashboard') }}"
-        class="bg-blue-400 text-black px-6 py-4 font-medium text-sm uppercase tracking-wide">
+        class="bg-blue-400 text-black px-6 py-3 font-medium text-sm uppercase tracking-wide block">
         Dashboard
     </a>
-    <a href="#assignments-section"
-        class="text-black px-6 py-4 font-medium text-sm uppercase tracking-wide hover:bg-gray-200">
+    <a href="{{ route('student.assignments.index') }}"
+        class="text-black px-6 py-3 font-medium text-sm uppercase tracking-wide hover:bg-gray-200 block transition-colors">
         Assignment
     </a>
 @endsection
 
 @section('content')
-    {{-- SECTION: PENGUMUMAN --}}
-    <div class="mb-10">
-        <h1 class="text-2xl text-black mb-4">Pengumuman</h1>
-        <div class="space-y-4">
-            {{--
-            Loop melalui data announcements dari controller
-            Variabel: $announcements (Collection of Announcement)
-            --}}
-            @forelse($announcements as $announcement)
-                <div class="border border-black bg-white p-4">
-                    <div class="text-sm font-bold space-y-1 mb-2">
-                        <p>Published In: {{ $announcement->created_at->format('Y-m-d H:i:s') }}</p>
-                        <p>Published By: {{ $announcement->user->name ?? 'Teacher' }}</p>
-                    </div>
-                    <h2 class="text-xl font-bold mb-2 uppercase">{{ $announcement->title }}</h2>
-                    <p class="text-base text-gray-900">{{ $announcement->content }}</p>
+    <div class="max-w-3xl mx-auto">
+        {{-- Notice Container --}}
+        <div class="bg-gray-100 min-h-[500px]">
+
+            {{-- Header with Navigation --}}
+            <div class="flex justify-between items-center p-4">
+                <h2 class="text-lg font-medium">Notice</h2>
+
+                {{-- Pagination Navigation --}}
+                <div class="flex space-x-2">
+                    @if ($announcements->previousPageUrl())
+                        <a href="{{ $announcements->previousPageUrl() }}"
+                            class="px-3 py-1 border border-gray-400 text-sm hover:bg-gray-200 transition">
+                            &lt; Previous
+                        </a>
+                    @else
+                        <span class="px-3 py-1 border border-gray-300 text-sm text-gray-400 cursor-not-allowed">
+                            &lt; Previous
+                        </span>
+                    @endif
+
+                    @if ($announcements->nextPageUrl())
+                        <a href="{{ $announcements->nextPageUrl() }}"
+                            class="px-3 py-1 border border-gray-400 text-sm hover:bg-gray-200 transition">
+                            Next&gt;
+                        </a>
+                    @else
+                        <span class="px-3 py-1 border border-gray-300 text-sm text-gray-400 cursor-not-allowed">
+                            Next&gt;
+                        </span>
+                    @endif
                 </div>
-            @empty
-                <div class="border border-gray-300 bg-white p-4 text-center text-gray-500">
-                    Belum ada pengumuman.
-                </div>
-            @endforelse
-        </div>
-    </div>
+            </div>
 
-    {{-- SECTION: DAFTAR TUGAS --}}
-    <div id="assignments-section">
-        <h1 class="text-2xl text-black mb-4">Daftar Tugas</h1>
-        <div class="space-y-4">
-            {{--
-            Loop melalui data assignments dari controller
-            Variabel: $assignments (Collection of Assignment)
-            Variabel: $submittedAssignmentIds (Array) - untuk cek status submit
-            --}}
-            @forelse($assignments as $assignment)
-                <div class="border border-black p-4 flex justify-between items-center bg-gray-50">
-                    <div class="flex-1">
-                        <h3 class="font-semibold text-black text-lg">{{ $assignment->title }}</h3>
-                        <p class="text-gray-600 text-sm mt-1">
-                            Posted: {{ $assignment->created_at->format('Y-m-d') }}
-                        </p>
-                        <p class="text-gray-700 mt-2">
-                            {{ Str::limit($assignment->description, 100) }}
-                        </p>
+            {{-- Announcements List (Accordion Style) --}}
+            <div class="px-4 pb-4 space-y-2">
+                @forelse($announcements as $index => $announcement)
+                    <div class="border border-gray-300 bg-white">
+                        {{-- Accordion Header --}}
+                        <button type="button" onclick="toggleAccordion({{ $announcement->id }})"
+                            class="w-full p-4 text-left flex justify-between items-start hover:bg-gray-50 transition">
+                            <div>
+                                <p class="text-sm">
+                                    <span class="font-medium">Published In:</span>
+                                    {{ $announcement->created_at->format('Y-d-m H:i:s') }}
+                                </p>
+                                <p class="text-sm">
+                                    <span class="font-medium">Published By:</span>
+                                    {{ $announcement->user->name ?? 'USER' }}
+                                </p>
 
-                        @if($assignment->file_path)
-                            <a href="{{ Storage::url($assignment->file_path) }}" target="_blank"
-                                class="text-blue-500 text-sm hover:underline">
-                                📎 Download Materi
-                            </a>
-                        @endif
-                    </div>
+                                {{-- Title (shown always) --}}
+                                <p class="font-bold text-lg mt-2" id="title-{{ $announcement->id }}">
+                                    {{ $announcement->title }}
+                                </p>
+                            </div>
 
-                    <div class="ml-4">
-                        {{--
-                        Cek apakah tugas ini sudah dikumpulkan
-                        Menggunakan $submittedAssignmentIds dari controller
-                        --}}
-                        @if(in_array($assignment->id, $submittedAssignmentIds))
-                            <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-                                ✓ Sudah Dikumpulkan
+                            {{-- Toggle Icon --}}
+                            <span class="text-gray-600 mt-1">
+                                {{-- Collapse Icon (up arrow - shown when expanded) --}}
+                                <svg id="icon-up-{{ $announcement->id }}"
+                                    class="w-5 h-5 {{ $index === 0 ? '' : 'hidden' }}" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 15l7-7 7 7" />
+                                </svg>
+                                {{-- Expand Icon (down arrow - shown when collapsed) --}}
+                                <svg id="icon-down-{{ $announcement->id }}"
+                                    class="w-5 h-5 {{ $index === 0 ? 'hidden' : '' }}" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
                             </span>
-                        @else
-                            {{--
-                            TODO: Integrasi dengan route student.submissions.store
-                            Form untuk mengumpulkan tugas
-                            --}}
-                            <form action="{{ route('student.submissions.store') }}" method="POST" enctype="multipart/form-data"
-                                class="flex flex-col items-end space-y-2">
-                                @csrf
-                                <input type="hidden" name="assignment_id" value="{{ $assignment->id }}">
+                        </button>
 
-                                <input type="file" name="file_path" required class="text-sm border rounded px-2 py-1"
-                                    accept=".pdf,.doc,.docx,.zip,.jpg,.png">
-
-                                <button type="submit"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium">
-                                    Kumpulkan
-                                </button>
-                                <p class="text-xs text-gray-500">Max 5MB (PDF, DOC, ZIP, JPG, PNG)</p>
-                            </form>
-                        @endif
+                        {{-- Accordion Content (expandable) --}}
+                        <div id="content-{{ $announcement->id }}" class="px-4 pb-4 {{ $index === 0 ? '' : 'hidden' }}">
+                            <p class="text-gray-700">{{ $announcement->content }}</p>
+                        </div>
                     </div>
-                </div>
-            @empty
-                <div class="border border-gray-300 bg-white p-4 text-center text-gray-500">
-                    Belum ada tugas.
-                </div>
-            @endforelse
+                @empty
+                    <div class="border border-gray-300 bg-white p-8 text-center text-gray-500">
+                        <p>Belum ada pengumuman.</p>
+                    </div>
+                @endforelse
+            </div>
+
         </div>
     </div>
 
-    {{-- SECTION: NILAI SAYA --}}
-    <div class="mt-10">
-        <h1 class="text-2xl text-black mb-4">Nilai Saya</h1>
-        <div class="bg-white border border-black">
-            <table class="min-w-full">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-sm font-medium">Tugas</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium">Waktu Pengumpulan</th>
-                        <th class="px-4 py-2 text-left text-sm font-medium">Nilai</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{--
-                    Loop melalui data submissions dari controller
-                    Variabel: $mySubmissions (Collection of Submission with assignment)
-                    --}}
-                    @forelse($mySubmissions as $submission)
-                        <tr class="border-t">
-                            <td class="px-4 py-2 text-sm">{{ $submission->assignment->title }}</td>
-                            <td class="px-4 py-2 text-sm">{{ $submission->created_at->format('d M Y H:i') }}</td>
-                            <td class="px-4 py-2 text-sm">
-                                @if($submission->score !== null)
-                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded font-bold">
-                                        {{ $submission->score }}
-                                    </span>
-                                @else
-                                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded">
-                                        Menunggu Penilaian
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="px-4 py-4 text-center text-gray-500">
-                                Anda belum mengumpulkan tugas apapun.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <script>
+        function toggleAccordion(id) {
+            const content = document.getElementById('content-' + id);
+            const iconUp = document.getElementById('icon-up-' + id);
+            const iconDown = document.getElementById('icon-down-' + id);
+
+            // Toggle content visibility
+            content.classList.toggle('hidden');
+
+            // Toggle icons
+            iconUp.classList.toggle('hidden');
+            iconDown.classList.toggle('hidden');
+        }
+    </script>
 @endsection

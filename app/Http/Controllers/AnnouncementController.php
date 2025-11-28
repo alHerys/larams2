@@ -1,73 +1,57 @@
 <?php
 
-// filepath: app/Http/Controllers/AnnouncementController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Announcement;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 
-/**
- * CONTROLLER: AnnouncementController
- *
- * Menangani CRUD pengumuman (hanya untuk guru)
- *
- * ROUTES yang ditangani:
- * - GET    /teacher/announcements          -> index()
- * - POST   /teacher/announcements          -> store()
- * - DELETE /teacher/announcements/{id}     -> destroy()
- */
 class AnnouncementController extends Controller
 {
     /**
-     * Menampilkan halaman pengumuman dengan form dan daftar
+     * Display list of announcements with create form
      */
-    public function index(): View
+    public function index()
     {
-        $announcements = Announcement::with('user')
-            ->latest()
-            ->paginate(10);
+        $announcements = Announcement::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('teacher.announcements.index', [
-            'announcements' => $announcements,
-        ]);
+        return view('teacher.announcements.index', compact('announcements'));
     }
 
     /**
-     * Menyimpan pengumuman baru
+     * Store a new announcement
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        // Validasi input
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
 
-        // Simpan ke database
-        Announcement::create([
-            'user_id' => Auth::id(),
-            'title' => $validated['title'],
-            'content' => $validated['content'],
-        ]);
+        $announcement = new Announcement;
+        $announcement->user_id = Auth::id();
+        $announcement->title = $validated['title'];
+        $announcement->content = $validated['content'];
+        $announcement->save();
 
-        return redirect()
-            ->route('teacher.announcements.index')
+        return redirect()->route('teacher.announcements.index')
             ->with('success', 'Pengumuman berhasil dibuat!');
     }
 
     /**
-     * Menghapus pengumuman
+     * Delete an announcement
      */
-    public function destroy(Announcement $announcement): RedirectResponse
+    public function destroy($id)
     {
+        $announcement = Announcement::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
         $announcement->delete();
 
-        return redirect()
-            ->route('teacher.announcements.index')
+        return redirect()->route('teacher.announcements.index')
             ->with('success', 'Pengumuman berhasil dihapus!');
     }
 }

@@ -78,11 +78,13 @@ Route::middleware(['auth', 'role:teacher'])
             Route::post('/', [AssignmentController::class, 'store'])->name('store');
             Route::get('/{assignment}', [AssignmentController::class, 'show'])->name('show');
             Route::delete('/{assignment}', [AssignmentController::class, 'destroy'])->name('destroy');
+            Route::put('/{id}', [AssignmentController::class, 'update'])->name('update');
         });
 
         // Grading (Penilaian)
         Route::put('/submissions/{submission}/grade', [SubmissionController::class, 'grade'])
             ->name('submissions.grade');
+        Route::post('/submissions/grade-all', [SubmissionController::class, 'gradeAll'])->name('submissions.gradeAll');
     });
 
 /*
@@ -92,16 +94,15 @@ Route::middleware(['auth', 'role:teacher'])
 | Route khusus untuk murid
 | Middleware: auth (harus login) + role:student (harus murid)
 */
-Route::middleware(['auth', 'role:student'])
-    ->prefix('student')
-    ->name('student.')
-    ->group(function () {
+Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
 
-        // Dashboard
-        Route::get('/dashboard', [DashboardController::class, 'index'])
-            ->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'studentDashboard'])->name('dashboard');
 
-        // Submissions (Pengumpulan Tugas)
-        Route::post('/submissions', [SubmissionController::class, 'store'])
-            ->name('submissions.store');
-    });
+    // Assignments
+    Route::get('/assignments', [AssignmentController::class, 'studentIndex'])->name('assignments.index');
+    Route::get('/assignments/{id}', [AssignmentController::class, 'studentShow'])->name('assignments.show');
+
+    // Submissions
+    Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
+});
