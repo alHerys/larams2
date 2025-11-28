@@ -4,8 +4,8 @@
 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +18,35 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Hanya untuk user yang BELUM login)
+|--------------------------------------------------------------------------
+| Middleware 'guest' akan redirect ke dashboard jika sudah login
+*/
+Route::middleware('guest')->group(function () {
+    // Register
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])
+        ->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+
+    // Login
+    Route::get('/login', [AuthController::class, 'showLoginForm'])
+        ->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (Hanya untuk user yang SUDAH login)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    // Logout (harus POST untuk keamanan)
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -76,21 +105,3 @@ Route::middleware(['auth', 'role:student'])
         Route::post('/submissions', [SubmissionController::class, 'store'])
             ->name('submissions.store');
     });
-
-/*
-|--------------------------------------------------------------------------
-| Profile Routes (Semua User)
-|--------------------------------------------------------------------------
-*/
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
-
-/*
-|--------------------------------------------------------------------------
-| Auth Routes (Breeze)
-|--------------------------------------------------------------------------
-*/
-require __DIR__.'/auth.php';
