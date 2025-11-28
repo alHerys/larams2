@@ -86,7 +86,7 @@ class AuthController extends Controller
      * HTTP Method: GET
      * URL: /login
      */
-    public function showLoginForm(): View
+    public function showLoginForm()
     {
         return view('auth.login');
     }

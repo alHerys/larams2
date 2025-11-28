@@ -1,6 +1,13 @@
-{{-- filepath: resources/views/welcome.blade.php --}}
+{{--
+filepath: resources/views/welcome.blade.php
+
+VIEW: Welcome/Landing Page
+FUNGSI: Halaman utama yang ditampilkan saat pertama kali mengakses website
+
+ROUTE: route('home') atau '/'
+--}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -112,18 +119,24 @@
 </head>
 
 <body>
+
     <div class="container">
+
         <div class="circle1"></div>
         <div class="circle2"></div>
 
         <h1>LaraMS</h1>
-        <p class="tagline">- Learning Management System -</p>
-        <p class="tagline">Mulai perjalananmu dengan akses cepat dan mudah.</p>
+        <p class="tagline">
+            - Learning Management System -
+        </p>
+        <p class="tagline">
+            Mulai perjalananmu dengan akses cepat dan mudah.
+        </p>
 
         <div class="btn-box">
             {{--
-            TODO: Integrasi dengan route
-            Route yang digunakan: login, register
+            TODO: Integrasi dengan route login dan register
+            Route: route('login'), route('register')
             --}}
             <a href="{{ route('login') }}" class="btn btn-login">Masuk</a>
             <a href="{{ route('register') }}" class="btn btn-register">Daftar</a>
@@ -132,7 +145,9 @@
         <footer>
             © {{ date('Y') }} LaraMS — Learning Web Platform
         </footer>
+
     </div>
+
 </body>
 
 </html>
