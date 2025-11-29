@@ -1,16 +1,3 @@
-{{--
-filepath: resources/views/layouts/guest.blade.php
-
-LAYOUT: Guest Layout
-FUNGSI: Layout untuk halaman yang tidak memerlukan autentikasi (login, register)
-
-PENGGUNAAN DI VIEW:
-@extends('layouts.guest')
-@section('title', 'Judul Halaman')
-@section('content')
-... isi halaman ...
-@endsection
---}}
 <!DOCTYPE html>
 <html lang="id">
 
@@ -31,24 +18,18 @@ PENGGUNAAN DI VIEW:
             font-family: 'Inter', sans-serif;
         }
     </style>
-
-    {{--
-    TODO: Integrasi dengan Vite
-    Uncomment baris berikut setelah mengkonfigurasi Vite:
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    --}}
 </head>
 
 <body class="bg-[#AEDEFC] min-h-screen">
 
     {{-- Flash Messages --}}
-    @if(session('success'))
+    @if (session('success'))
         <div class="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50">
             {{ session('success') }}
         </div>
     @endif
 
-    @if(session('error'))
+    @if (session('error'))
         <div class="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50">
             {{ session('error') }}
         </div>

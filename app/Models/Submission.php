@@ -57,18 +57,11 @@ class Submission extends Model
 
     /**
      * Submission terkait dengan satu Assignment
-     *
-     * PENGGUNAAN:
-     * $submission->assignment->title // Judul tugas
      */
     public function assignment(): BelongsTo
     {
         return $this->belongsTo(Assignment::class);
     }
-
-    // =========================================
-    // HELPER METHODS
-    // =========================================
 
     /**
      * Cek apakah submission sudah dinilai

@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class SubmissionController extends Controller
 {
-    /**
-     * Store a new submission (for student)
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -40,9 +37,6 @@ class SubmissionController extends Controller
         return back()->with('success', 'Tugas berhasil dikumpulkan!');
     }
 
-    /**
-     * Grade a single submission (for teacher)
-     */
     public function grade(Request $request, $id)
     {
         $validated = $request->validate([
@@ -62,9 +56,6 @@ class SubmissionController extends Controller
         return back()->with('success', 'Nilai berhasil disimpan!');
     }
 
-    /**
-     * Grade all submissions at once (for teacher)
-     */
     public function gradeAll(Request $request)
     {
         $validated = $request->validate([

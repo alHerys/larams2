@@ -1,18 +1,3 @@
-{{--
-filepath: resources/views/teacher/assignments/create.blade.php
-
-VIEW: Create Assignment
-FUNGSI: Halaman form untuk guru membuat tugas baru
-
-CONTROLLER: AssignmentController@create (GET), AssignmentController@store (POST)
-ROUTE: route('teacher.assignments.create')
-
-FORM FIELDS:
-- title: Judul tugas
-- description: Deskripsi/instruksi tugas
-- file_path: File lampiran (opsional)
-- due_date: Deadline tugas (opsional)
---}}
 @extends('layouts.app')
 
 @section('title', 'Buat Tugas')

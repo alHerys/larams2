@@ -1,11 +1,3 @@
-{{--
-filepath: resources/views/welcome.blade.php
-
-VIEW: Welcome/Landing Page
-FUNGSI: Halaman utama yang ditampilkan saat pertama kali mengakses website
-
-ROUTE: route('home') atau '/'
---}}
 <!DOCTYPE html>
 <html lang="id">
 

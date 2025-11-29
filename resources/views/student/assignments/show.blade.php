@@ -1,17 +1,3 @@
-{{-- 
-    filepath: resources/views/student/assignments/show.blade.php
-    
-    VIEW: Student Assignment Detail
-    FUNGSI: Halaman detail tugas untuk murid dengan form submit
-    
-    CONTROLLER: AssignmentController@studentShow
-    ROUTE: route('student.assignments.show', $id)
-    
-    VARIABEL DARI CONTROLLER:
-    - $assignment: Assignment model
-    - $submission: Submission model (nullable - jika sudah submit)
-    - $hasSubmitted: boolean
---}}
 @extends('layouts.app')
 
 @section('title', 'View Assignment')

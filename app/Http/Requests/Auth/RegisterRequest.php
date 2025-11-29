@@ -7,37 +7,13 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-/**
- * FORM REQUEST: RegisterRequest
- *
- * Menangani validasi untuk registrasi user baru
- *
- * BEST PRACTICE:
- * - Pisahkan validasi dari controller
- * - Gunakan class Password untuk aturan password yang kuat
- * - Sediakan pesan error yang jelas dalam bahasa Indonesia
- */
 class RegisterRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * Return true karena registrasi terbuka untuk siapa saja
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * ATURAN VALIDASI:
-     * - name: wajib, string, maksimal 255 karakter
-     * - email: wajib, format email valid, unik di tabel users
-     * - password: wajib, minimal 8 karakter, harus dikonfirmasi
-     * - role: opsional, harus 'teacher' atau 'student'
-     */
     public function rules(): array
     {
         return [
@@ -57,20 +33,15 @@ class RegisterRequest extends FormRequest
                 'required',
                 'string',
                 Password::min(8),
-                'confirmed', // Membutuhkan field password_confirmation
+                'confirmed',
             ],
             'role' => [
-                'sometimes', // Opsional
+                'sometimes',
                 'in:teacher,student',
             ],
         ];
     }
 
-    /**
-     * Get custom error messages for validation rules.
-     *
-     * BEST PRACTICE: Sediakan pesan error yang user-friendly
-     */
     public function messages(): array
     {
         return [

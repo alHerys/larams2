@@ -1,16 +1,3 @@
-{{--
-filepath: resources/views/auth/login.blade.php
-
-VIEW: Login Page
-FUNGSI: Halaman login untuk semua user (teacher & student)
-
-CONTROLLER: AuthController@showLoginForm (GET), AuthController@login (POST)
-ROUTE: route('login')
-
-FORM FIELDS:
-- email: Email pengguna
-- password: Password pengguna
---}}
 @extends('layouts.guest')
 
 @section('title', 'Login')
@@ -23,10 +10,10 @@ FORM FIELDS:
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">LOGIN</h2>
 
             {{-- Error Messages --}}
-            @if($errors->any())
+            @if ($errors->any())
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <ul class="list-disc list-inside">
-                        @foreach($errors->all() as $error)
+                        @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>

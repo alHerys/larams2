@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AnnouncementController extends Controller
 {
-    /**
-     * Display list of announcements with create form
-     */
     public function index()
     {
         $announcements = Announcement::where('user_id', Auth::id())
@@ -20,9 +17,6 @@ class AnnouncementController extends Controller
         return view('teacher.announcements.index', compact('announcements'));
     }
 
-    /**
-     * Store a new announcement
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -40,9 +34,6 @@ class AnnouncementController extends Controller
             ->with('success', 'Pengumuman berhasil dibuat!');
     }
 
-    /**
-     * Delete an announcement
-     */
     public function destroy($id)
     {
         $announcement = Announcement::where('id', $id)

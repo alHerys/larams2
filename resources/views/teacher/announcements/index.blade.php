@@ -1,15 +1,3 @@
-{{-- 
-    filepath: resources/views/teacher/announcements/index.blade.php
-    
-    VIEW: Create & Manage Announcements
-    FUNGSI: Halaman untuk guru membuat pengumuman baru dan melihat history
-    
-    CONTROLLER: AnnouncementController@index
-    ROUTE: route('teacher.announcements.index')
-    
-    VARIABEL DARI CONTROLLER:
-    - $announcements: Collection of Announcement (all)
---}}
 @extends('layouts.app')
 
 @section('title', 'Announcement')

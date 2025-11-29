@@ -1,19 +1,3 @@
-{{--
-filepath: resources/views/auth/register.blade.php
-
-VIEW: Register Page
-FUNGSI: Halaman registrasi untuk user baru
-
-CONTROLLER: AuthController@showRegisterForm (GET), AuthController@register (POST)
-ROUTE: route('register')
-
-FORM FIELDS:
-- name: Nama lengkap
-- email: Email pengguna
-- password: Password
-- password_confirmation: Konfirmasi password
-- role: Role pengguna (teacher/student)
---}}
 @extends('layouts.guest')
 
 @section('title', 'Registrasi')
@@ -26,10 +10,10 @@ FORM FIELDS:
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">REGISTRASI</h2>
 
             {{-- Error Messages --}}
-            @if($errors->any())
+            @if ($errors->any())
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <ul class="list-disc list-inside">
-                        @foreach($errors->all() as $error)
+                        @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>

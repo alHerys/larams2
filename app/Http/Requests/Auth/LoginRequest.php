@@ -1,7 +1,5 @@
 <?php
 
-// filepath: app/Http/Requests/Auth/LoginRequest.php
-
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;
@@ -11,33 +9,13 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-/**
- * FORM REQUEST: LoginRequest
- *
- * Menangani validasi dan proses autentikasi login
- *
- * FITUR:
- * - Validasi input email dan password
- * - Rate limiting untuk mencegah brute force attack
- * - Custom error messages dalam bahasa Indonesia
- *
- * BEST PRACTICE:
- * - Implementasi rate limiting untuk keamanan
- * - Pisahkan logic autentikasi dari controller
- */
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
@@ -53,9 +31,6 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Custom error messages
-     */
     public function messages(): array
     {
         return [
@@ -65,17 +40,6 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Attempt to authenticate the request's credentials.
-     *
-     * FLOW:
-     * 1. Cek apakah sudah terlalu banyak percobaan gagal (rate limit)
-     * 2. Coba autentikasi dengan email dan password
-     * 3. Jika gagal, tambah counter rate limit
-     * 4. Jika berhasil, reset counter rate limit
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
@@ -94,14 +58,6 @@ class LoginRequest extends FormRequest
         RateLimiter::clear($this->throttleKey());
     }
 
-    /**
-     * Ensure the login request is not rate limited.
-     *
-     * Mencegah brute force attack dengan membatasi
-     * maksimal 5 percobaan login gagal per menit
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function ensureIsNotRateLimited(): void
     {
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
@@ -119,12 +75,6 @@ class LoginRequest extends FormRequest
         ]);
     }
 
-    /**
-     * Get the rate limiting throttle key for the request.
-     *
-     * Key dibuat dari kombinasi email + IP address
-     * untuk mencegah bypass dengan ganti email
-     */
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());

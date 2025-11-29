@@ -1,19 +1,3 @@
-{{--
-filepath: resources/views/layouts/app.blade.php
-
-LAYOUT: App Layout (Authenticated)
-FUNGSI: Layout utama untuk halaman yang memerlukan autentikasi
-
-PENGGUNAAN DI VIEW:
-@extends('layouts.app')
-@section('title', 'Judul Halaman')
-@section('sidebar')
-... isi sidebar ...
-@endsection
-@section('content')
-... isi halaman ...
-@endsection
---}}
 <!DOCTYPE html>
 <html lang="id">
 
@@ -45,13 +29,6 @@ PENGGUNAAN DI VIEW:
 
     {{-- HEADER --}}
     <header class="bg-blue-300 h-16 flex items-center justify-between px-6 shadow-sm flex-shrink-0">
-        {{-- Back Button --}}
-        {{-- <button onclick="history.back()" class="text-black hover:opacity-70">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                stroke="currentColor" class="w-8 h-8">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-        </button> --}}
 
         {{-- User Info & Logout --}}
         <div class="flex items-center space-x-4 ml-auto">

@@ -1,15 +1,3 @@
-{{-- 
-    filepath: resources/views/teacher/assignments/show.blade.php
-    
-    VIEW: Assignment Detail (View Submissions)
-    FUNGSI: Halaman detail tugas untuk melihat daftar submission dari murid
-    
-    CONTROLLER: AssignmentController@show
-    ROUTE: route('teacher.assignments.show', $id)
-    
-    VARIABEL DARI CONTROLLER:
-    - $assignment: Assignment model with submissions.user
---}}
 @extends('layouts.app')
 
 @section('title', 'Detail Assignment')

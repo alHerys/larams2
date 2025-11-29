@@ -1,7 +1,5 @@
 <?php
 
-// filepath: routes/web.php
-
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\Auth\AuthController;
@@ -9,22 +7,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-| Route yang bisa diakses tanpa login
-*/
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-/*
-|--------------------------------------------------------------------------
-| Guest Routes (Hanya untuk user yang BELUM login)
-|--------------------------------------------------------------------------
-| Middleware 'guest' akan redirect ke dashboard jika sudah login
-*/
 Route::middleware('guest')->group(function () {
     // Register
     Route::get('/register', [AuthController::class, 'showRegisterForm'])
@@ -37,24 +23,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes (Hanya untuk user yang SUDAH login)
-|--------------------------------------------------------------------------
-*/
 Route::middleware('auth')->group(function () {
     // Logout (harus POST untuk keamanan)
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Teacher Routes
-|--------------------------------------------------------------------------
-| Route khusus untuk guru
-| Middleware: auth (harus login) + role:teacher (harus guru)
-*/
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
@@ -87,13 +61,6 @@ Route::middleware(['auth', 'role:teacher'])
         Route::post('/submissions/grade-all', [SubmissionController::class, 'gradeAll'])->name('submissions.gradeAll');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Student Routes
-|--------------------------------------------------------------------------
-| Route khusus untuk murid
-| Middleware: auth (harus login) + role:student (harus murid)
-*/
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
 
     // Dashboard

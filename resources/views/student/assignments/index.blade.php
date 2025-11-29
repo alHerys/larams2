@@ -1,15 +1,3 @@
-{{-- 
-    filepath: resources/views/student/assignments/index.blade.php
-    
-    VIEW: Student Assignments List
-    FUNGSI: Halaman daftar tugas untuk murid
-    
-    CONTROLLER: AssignmentController@studentIndex
-    ROUTE: route('student.assignments.index')
-    
-    VARIABEL DARI CONTROLLER:
-    - $assignments: Collection of Assignment
---}}
 @extends('layouts.app')
 
 @section('title', 'Assignments')

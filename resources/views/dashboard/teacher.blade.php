@@ -1,17 +1,3 @@
-{{-- 
-    filepath: resources/views/dashboard/teacher.blade.php
-    
-    VIEW: Teacher Dashboard
-    FUNGSI: Halaman dashboard untuk guru yang menampilkan:
-    - Daftar pengumuman dengan accordion style
-    - Navigasi Previous/Next untuk pagination
-    
-    CONTROLLER: DashboardController@teacherDashboard
-    ROUTE: route('teacher.dashboard')
-    
-    VARIABEL DARI CONTROLLER:
-    - $announcements: Paginated Collection of Announcement
---}}
 @extends('layouts.app')
 
 @section('title', 'Teacher Dashboard')

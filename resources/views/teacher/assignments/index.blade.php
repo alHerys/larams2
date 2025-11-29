@@ -1,17 +1,3 @@
-{{-- 
-    filepath: resources/views/teacher/assignments/index.blade.php
-    
-    VIEW: View Assignment dengan Edit Panel dan View (Grading) Panel
-    FUNGSI: Halaman untuk melihat daftar tugas, mengedit tugas, dan memberi nilai
-    
-    CONTROLLER: AssignmentController@index
-    ROUTE: route('teacher.assignments.index')
-    
-    VARIABEL DARI CONTROLLER:
-    - $assignments: Collection of Assignment
-    - $selectedAssignment: Assignment yang sedang dipilih (nullable)
-    - $mode: 'edit' atau 'view' (nullable)
---}}
 @extends('layouts.app')
 
 @section('title', 'View Assignment')

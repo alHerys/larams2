@@ -1,7 +1,5 @@
 <?php
 
-// filepath: app/Http/Controllers/DashboardController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Announcement;
@@ -10,27 +8,8 @@ use App\Models\Submission;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-/**
- * CONTROLLER: DashboardController
- *
- * Menangani tampilan dashboard untuk guru dan murid
- *
- * PRINSIP:
- * - Satu controller untuk dashboard (bukan TeacherDashboardController & StudentDashboardController)
- * - Logic pemisahan berdasarkan role ada di dalam method
- * - Lebih mudah di-maintain dan konsisten
- */
 class DashboardController extends Controller
 {
-    /**
-     * Menampilkan dashboard sesuai role user
-     *
-     * FLOW:
-     * 1. Ambil user yang login
-     * 2. Cek role user
-     * 3. Query data yang relevan
-     * 4. Return view yang sesuai
-     */
     public function index(): View
     {
         $user = Auth::user();
@@ -42,14 +21,6 @@ class DashboardController extends Controller
         return $this->studentDashboard();
     }
 
-    /**
-     * Dashboard untuk guru
-     *
-     * DATA YANG DITAMPILKAN:
-     * - Daftar pengumuman terbaru
-     * - Daftar tugas yang dibuat
-     * - Daftar submission terbaru dari murid
-     */
     private function teacherDashboard(): View
     {
         $announcements = Announcement::with('user')
@@ -73,14 +44,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Dashboard untuk murid
-     *
-     * DATA YANG DITAMPILKAN:
-     * - Daftar pengumuman
-     * - Daftar tugas yang tersedia
-     * - Daftar submission dan nilai
-     */
     public function studentDashboard(): View
     {
         $announcements = Announcement::with('user')

@@ -1,17 +1,3 @@
-{{-- 
-    filepath: resources/views/dashboard/student.blade.php
-    
-    VIEW: Student Dashboard
-    FUNGSI: Halaman dashboard untuk murid yang menampilkan:
-    - Daftar pengumuman dengan accordion style (sama seperti teacher)
-    - Navigasi Previous/Next untuk pagination
-    
-    CONTROLLER: DashboardController@studentDashboard
-    ROUTE: route('student.dashboard')
-    
-    VARIABEL DARI CONTROLLER:
-    - $announcements: Paginated Collection of Announcement
---}}
 @extends('layouts.app')
 
 @section('title', 'Student Dashboard')
